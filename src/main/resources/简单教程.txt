@@ -1,0 +1,14 @@
+struct标签下面的event_id_generate_type属性：
+    AUTO_GENERATE 自动生成iEventId，iEventId不会出现在日志参数里面，在日志方法里面自动生成，这个为默认值
+    PASS_IN       将iEventId传入日志方法里面
+    AUTO_GENERATE_AND_PASS_IN   上面两个方法都生成
+
+struct标签下面的dont_use_special_arg属性：
+    true 代表不使用特殊参数配置
+    其他值或者不填 代表使用特殊参数配置
+
+entry中的type属性：
+    int 用uint
+    long 用bigint
+    String 用string
+    日期用 datetime，日期生成的日志方法中用long表示，记录日志的时候会自动转成数据后台需要的格式
