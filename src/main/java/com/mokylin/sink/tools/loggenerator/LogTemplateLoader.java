@@ -22,137 +22,200 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
- * 日志模板加载器
- * Created by yaguang.xiao on 2016/9/6.
+ * 日志模板加载器 Created by yaguang.xiao on 2016/9/6.
  */
-class LogTemplateLoader {
+public class LogTemplateLoader {
 
-		static final String OPERATOR_ID_NAME = "operatorID";
-		static final String IEVENT_ID = "iEventId";
-		static final String IWORLD_ID = "iWorldId";
+    public static final String OPERATOR_ID_NAME = "operatorID";
+    static final String IEVENT_ID = "iEventId";
+    static final String IWORLD_ID = "iWorldId";
 
-		enum EventIdGenerateType {
-				/** 自动生成 */
-				AUTO_GENERATE, /** 传入日志方法 */
-				PASS_IN, /** 上面两个方法都生成 */
-				AUTO_GENERATE_AND_PASS_IN,
-		}
+    enum EventIdGenerateType {
+        /**
+         * 自动生成
+         */
+        AUTO_GENERATE,
+        /**
+         * 传入日志方法
+         */
+        PASS_IN,
+        /**
+         * 上面两个方法都生成
+         */
+        AUTO_GENERATE_AND_PASS_IN,
+    }
 
-		static List<LogTemplate> loadLogTemplateFromXml(final String path)
-						throws ParserConfigurationException, IOException, SAXException {
-				File file = new File(path);
-				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-				Document doc = dBuilder.parse(file);
+    public enum UseSpeicalArgType {
+        USE, // 使用
+        DONT, // 不用
+        ALL // 两种都生成
+    }
 
-				doc.getDocumentElement().normalize();
+    enum LogType {
 
-				NodeList structNodes = doc.getElementsByTagName("struct");
-				List<LogTemplate> logTemplateList = Lists.newArrayListWithCapacity(structNodes.getLength());
-				Set<String> logNames = Sets.newHashSet();
-				for (int i = 0; i < structNodes.getLength(); i++) {
-						Node structNode = structNodes.item(i);
-						if (structNode.getNodeType() == Node.ELEMENT_NODE) {
-								LogTemplate logTemplate = loadLogTemplate((Element) structNode);
+        Molin,
+        Tencent,
+        MolinAndTencent,
 
-								if (logNames.contains(logTemplate.logName)) {
-										throw new RuntimeException("有重复日志：" + logTemplate.logName);
-								}
-								logNames.add(logTemplate.logName);
+    }
 
-								logTemplateList.add(logTemplate);
-						}
-				}
+    public static List<LogTemplate> loadLogTemplateFromXml(final String path)
+            throws ParserConfigurationException, IOException, SAXException {
+        File file = new File(path);
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(file);
 
-				return logTemplateList;
-		}
+        doc.getDocumentElement().normalize();
 
-		private static LogTemplate loadLogTemplate(Element structElement) {
-				String logName = structElement.getAttribute("name");
-				if (Strings.isNullOrEmpty(logName)) {
-						throw new RuntimeException("竟然有个日志没有填名字！！！");
-				}
-				String logDesc = structElement.getAttribute("desc");
+        NodeList structNodes = doc.getElementsByTagName("struct");
+        List<LogTemplate> logTemplateList = Lists.newArrayListWithCapacity(structNodes.getLength());
+        Set<String> logNames = Sets.newHashSet();
+        for (int i = 0; i < structNodes.getLength(); i++) {
+            Node structNode = structNodes.item(i);
+            if (structNode.getNodeType() == Node.ELEMENT_NODE) {
+                LogTemplate logTemplate = loadLogTemplate((Element) structNode);
 
-				String dontUseSpecialArgStr = structElement.getAttribute("dont_use_special_arg");
-				boolean dontUseSpecialArg = false;
-				if (!Strings.isNullOrEmpty(dontUseSpecialArgStr)) {
-						if (dontUseSpecialArgStr.equals("true")) {
-								dontUseSpecialArg = true;
-						}
-				}
+                if (logNames.contains(logTemplate.logName)) {
+                    throw new RuntimeException("有重复日志：" + logTemplate.logName);
+                }
+                logNames.add(logTemplate.logName);
 
-				String eventIdGenerateType = structElement.getAttribute("event_id_generate_type");
-				if (Strings.isNullOrEmpty(eventIdGenerateType)) {
-						eventIdGenerateType = EventIdGenerateType.AUTO_GENERATE.name();
-				}
+                logTemplateList.add(logTemplate);
 
-				boolean valid = false;
-				for (EventIdGenerateType idGenerateType : EventIdGenerateType.values()) {
-						if (eventIdGenerateType.equals(idGenerateType.name())) {
-								valid = true;
-								break;
-						}
-				}
-				if (!valid) {
-						throw new RuntimeException(
-										"event_id_generate_type无效，格式为：不填默认AUTO_GENERATE， AUTO_GENERATE-自" +
-														"动生成， PASS_IN-传入日志方法，AUTO_GENERATE_AND_PASS_IN-前面两个方法都" + "生成。日志名称:" +
-														logName);
-				}
+                if (logTemplate.useSpeicalArgType == UseSpeicalArgType.ALL) {
+                    logTemplateList.add(logTemplate.copyUseSpeicalArgTemplate());
+                }
+            }
+        }
 
-				NodeList entryNodes = structElement.getElementsByTagName("entry");
-				List<LogField> fields = Lists.newArrayListWithCapacity(entryNodes.getLength() + 1);
-				fields.add(new LogField("uint", OPERATOR_ID_NAME, "平台Id",
-								"", false)); // 每个日志都需要平台id，但是字段里面是不需要记录平台Id的
-				Set<String> fieldNames = Sets.newHashSet();
-				fieldNames.add(OPERATOR_ID_NAME);
-				for (int i = 0; i < entryNodes.getLength(); i++) {
-						Node entryNode = entryNodes.item(i);
-						if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
-								LogField logField = loadLogField(((Element) entryNode), logName);
+        return logTemplateList;
+    }
 
-								if (fieldNames.contains(logField.name)) {
-										throw new RuntimeException("日志：" + logName + "中配置了相同的字段名字:" + logField.name);
-								}
-								fieldNames.add(logField.name);
+    private static LogTemplate loadLogTemplate(Element structElement) {
+        String logName = structElement.getAttribute("name");
+        if (Strings.isNullOrEmpty(logName)) {
+            throw new RuntimeException("竟然有个日志没有填名字！！！");
+        }
+        String logDesc = structElement.getAttribute("desc");
 
-								fields.add(logField);
-						}
-				}
+        boolean dontUseSpecialArg = false;
+        UseSpeicalArgType useSpeicalArgType = loadUseSpecialArgType(structElement);
+        if (useSpeicalArgType == UseSpeicalArgType.DONT || useSpeicalArgType == UseSpeicalArgType.ALL) {
+            dontUseSpecialArg = true;
+        }
 
-				if (fields.isEmpty()) {
-						throw new RuntimeException("在日志：" + logName + "中竟然没有配置字段！！！");
-				}
+        String eventIdGenerateType = loadLogEventGenerateType(structElement, logName);
 
-				if (!fieldNames.contains(IWORLD_ID)) {
-						throw new RuntimeException("在日志：" + logName + "中竟然没有配置服务器Id:iWorldId");
-				}
+        String logType = loadLogType(structElement, logName);
 
-				return new LogTemplate(logName, logDesc, "", eventIdGenerateType, fields,
-								dontUseSpecialArg);
-		}
+        int ioptype = Integer.parseInt(structElement.getAttribute("ioptype"));
+        int iactionid = Integer.parseInt(structElement.getAttribute("iactionid"));
 
-		private static LogField loadLogField(Element entryElement, String logName) {
-				String fieldName = entryElement.getAttribute("name");
-				if (Strings.isNullOrEmpty(fieldName)) {
-						throw new RuntimeException("日志：" + logName + "，里面竟然有个字段没有配置名字！！！");
-				}
+        NodeList entryNodes = structElement.getElementsByTagName("entry");
+        List<LogField> fields = Lists.newArrayListWithCapacity(entryNodes.getLength() + 1);
+        fields.add(
+                new LogField("uint", OPERATOR_ID_NAME, "平台Id", "", false)); // 每个日志都需要平台id，但是字段里面是不需要记录平台Id的
+        Set<String> fieldNames = Sets.newHashSet();
+        fieldNames.add(OPERATOR_ID_NAME);
+        for (int i = 0; i < entryNodes.getLength(); i++) {
+            Node entryNode = entryNodes.item(i);
+            if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
+                LogField logField = loadLogField(((Element) entryNode), logName);
 
-				String postFix = entryElement.getAttribute("post_fix");
-				fieldName = postFix != null ? fieldName + postFix : fieldName;
+                if (fieldNames.contains(logField.name)) {
+                    throw new RuntimeException("日志：" + logName + "中配置了相同的字段名字:" + logField.name);
+                }
+                fieldNames.add(logField.name);
 
-				String fieldType = entryElement.getAttribute("type");
-				if (Strings.isNullOrEmpty(fieldType)) {
-						throw new RuntimeException("日志：" + logName + "中的字段：" + fieldName + "竟然没有配置类型数据！！！");
-				}
+                fields.add(logField);
+            }
+        }
 
-				String fieldDesc = entryElement.getAttribute("desc");
+        if (fields.isEmpty()) {
+            throw new RuntimeException("在日志：" + logName + "中竟然没有配置字段！！！");
+        }
 
-				String isBoolStr = entryElement.getAttribute("is_bool");
-				boolean isBoolValue = isBoolStr != null && isBoolStr.equals("true");
+        if (!fieldNames.contains(IWORLD_ID)) {
+            throw new RuntimeException("在日志：" + logName + "中竟然没有配置服务器Id:iWorldId");
+        }
 
-				return new LogField(fieldType, fieldName, fieldDesc, "", isBoolValue);
-		}
+        return new LogTemplate(ioptype, iactionid, logName, logDesc, "", eventIdGenerateType, fields, dontUseSpecialArg, logType, useSpeicalArgType);
+    }
+
+    private static String loadLogType(Element structElement, String logName) {
+        String logType = structElement.getAttribute("log_type");
+        if (Strings.isNullOrEmpty(logType)) {
+            logType = LogType.Tencent.name();
+        }
+
+        boolean valid = false;
+        for (LogType type : LogType.values()) {
+            if (logType.equals(type.name())) {
+                valid = true;
+                break;
+            }
+        }
+        checkArgument(valid, "log_type无效，格式为：不填默认Molin，Molin-只记录在墨麟平台，" +
+                "Tencent-只记录在腾讯平台,MolinAndTencent-记录在墨麟和腾讯平台,日志名称:%s", logName);
+        return logType;
+    }
+
+    private static UseSpeicalArgType loadUseSpecialArgType(Element structElement) {
+        String dontUseSpecialArgStr = structElement.getAttribute("dont_use_special_arg");
+        if (Strings.isNullOrEmpty(dontUseSpecialArgStr)) {
+            return UseSpeicalArgType.USE;
+        }
+
+        return UseSpeicalArgType.valueOf(dontUseSpecialArgStr);
+    }
+
+    private static String loadLogEventGenerateType(Element structElement, String logName) {
+        String eventIdGenerateType = structElement.getAttribute("event_id_generate_type");
+        if (Strings.isNullOrEmpty(eventIdGenerateType)) {
+            eventIdGenerateType = EventIdGenerateType.AUTO_GENERATE.name();
+        }
+
+        boolean valid = false;
+        for (EventIdGenerateType idGenerateType : EventIdGenerateType.values()) {
+            if (eventIdGenerateType.equals(idGenerateType.name())) {
+                valid = true;
+                break;
+            }
+        }
+        if (!valid) {
+            throw new RuntimeException(
+                    "event_id_generate_type无效，格式为：不填默认AUTO_GENERATE， AUTO_GENERATE-自"
+                            + "动生成， PASS_IN-传入日志方法，AUTO_GENERATE_AND_PASS_IN-前面两个方法都"
+                            + "生成。日志名称:"
+                            + logName);
+        }
+
+        return eventIdGenerateType;
+    }
+
+    private static LogField loadLogField(Element entryElement, String logName) {
+        String fieldName = entryElement.getAttribute("name");
+        if (Strings.isNullOrEmpty(fieldName)) {
+            throw new RuntimeException("日志：" + logName + "，里面竟然有个字段没有配置名字！！！");
+        }
+
+        String postFix = entryElement.getAttribute("post_fix");
+        fieldName = postFix != null ? fieldName + postFix : fieldName;
+
+        String fieldType = entryElement.getAttribute("type");
+        if (Strings.isNullOrEmpty(fieldType)) {
+            throw new RuntimeException("日志：" + logName + "中的字段：" + fieldName + "竟然没有配置类型数据！！！");
+        }
+
+        String fieldDesc = entryElement.getAttribute("desc");
+
+        String isBoolStr = entryElement.getAttribute("is_bool");
+        boolean isBoolValue = isBoolStr != null && isBoolStr.equals("true");
+
+        return new LogField(fieldType, fieldName, fieldDesc, "", isBoolValue);
+    }
 }

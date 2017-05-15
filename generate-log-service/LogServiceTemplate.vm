@@ -1,0 +1,100 @@
+package app.game.service.log;
+
+import com.google.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.qq.ptlogin2.TencentLogService;
+import app.utils.IDUtils;
+#foreach($className in $importClasses)
+import $className;
+#end
+
+/**
+ * Created by yaguang.xiao on 2017/5/13.
+ */
+public class LogService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LogService.class);
+
+    private final LogManager logManager;
+
+	private final MolinLogService molinLogService;
+	private final TencentLogService tencentLogService;
+
+	@Inject
+	LogService(LogManager logManager, MolinLogService molinLogService, TencentLogService tencentLogService) {
+	    this.logManager = logManager;
+		this.molinLogService = molinLogService;
+		this.tencentLogService = tencentLogService;
+	}
+
+    public String newGeneralEventId(long id) {
+        return generateEventId(id, LogType.General);
+    }
+
+    public String generateEventId(long id, LogType logType) {
+        return generateEventId(IDUtils.getOperatorID(id), IDUtils.getServerID(id), logType);
+    }
+
+    public String generateEventId(int operateorId, int serverId, LogType logType) {
+        return IDUtils.newEventID(
+            operateorId, serverId, logType.ordinal(), logManager.secondTime.getValue());
+    }
+
+
+    public void shutdown() {
+        this.logManager.shutdown();
+    }
+
+	public enum LogType {
+	    General,
+#foreach($logMethod in $list)
+#if(${logMethod.useSpecialArgType} != "ALL")
+        ${logMethod.logName},
+#end
+#end
+    }
+
+#foreach($logMethod in $list)
+#if(${logMethod.eventIdGenerateType} == "AUTO_GENERATE_AND_PASS_IN")
+
+    public void log${logMethod.logName}(
+    $logMethod.noEventIdArgs
+    ) {
+            String iEventId = generateEventId(${logMethod.howToGetOperator}, ${logMethod.howToGetServerId}, LogType.${logMethod.logName});
+
+        $logMethod.containEventIdMethodCall
+    }
+
+#end
+    /**
+	 * $logMethod.description
+	 * $logMethod.remark
+$logMethod.fieldDescription
+	 */
+	public void log${logMethod.logName}(
+			$logMethod.args
+		) {
+		try {
+#if(${logMethod.eventIdGenerateType} == "AUTO_GENERATE")
+            String iEventId = generateEventId(${logMethod.howToGetOperator}, ${logMethod.howToGetServerId}, LogType.${logMethod.logName});
+#end
+
+#if(${logMethod.logType} == "Tencent")
+            tencentLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
+#elseif(${logMethod.logType} == "Molin")
+            molinLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
+#elseif(${logMethod.logType} == "TencentAndMolin")
+            tencentLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
+            molinLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
+#end
+
+		} catch (Exception e) {
+			logger.error("日志log${logMethod.logName}记录错误：", e);
+		}
+	}
+
+#end
+}

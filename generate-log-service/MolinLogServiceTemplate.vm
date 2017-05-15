@@ -1,0 +1,58 @@
+package app.game.service.log;
+
+import com.google.inject.Inject;
+
+import com.lmax.disruptor.RingBuffer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import app.utils.IDUtils;
+
+#foreach($className in $importClasses)
+import $className;
+#end
+
+/**
+ * 日志服务
+ * This is an auto generated source,please don't modify it.
+ */
+public class MolinLogService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(LogService.class);
+
+	private final LogManager logManager;
+
+    @Inject
+    public MolinLogService(LogManager logManager) {
+        this.logManager = logManager;
+    }
+
+#foreach($logMethod in $list)
+#if((${logMethod.logType} == "Molin" || ${logMethod.logType} == "MolinAndTencent") && ${logMethod.useSpecialArgType} != "ALL")
+	/**
+	 * $logMethod.description
+	 * $logMethod.remark
+	 */
+	public void log${logMethod.logName}(
+			$logMethod.molinArgs
+		) {
+		try {
+
+			RingBuffer<LogEvent> ringBuffer = logManager.ringBuffer;
+            long sequence = ringBuffer.next();
+            try {
+                LogEvent e = ringBuffer.get(sequence);
+                e.operatorID = $logMethod.howToGetOperator;
+
+$logMethod.molinSetter
+            } finally {
+                ringBuffer.publish(sequence);
+            }
+		} catch (Exception e) {
+			logger.error("日志log${logMethod.logName}记录错误：", e);
+		}
+	}
+#end
+#end
+}

@@ -1,5 +1,6 @@
 package com.mokylin.sink.tools.loggenerator;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -38,7 +39,11 @@ class ConvertToTemplateEntity {
         String logDescription = logTemplate.logDescprition;
         String logRemark = logTemplate.logRemark;
         StringBuilder argsB = new StringBuilder();
-        StringBuilder setterB = new StringBuilder();
+        StringBuilder methodCallArgsB = new StringBuilder();
+        StringBuilder molinArgsB = new StringBuilder();
+        StringBuilder molinSetterB = new StringBuilder();
+        StringBuilder tencentArgsB = new StringBuilder();
+        StringBuilder tencentSetterB = new StringBuilder();
         StringBuilder noEventIdArgsB = new StringBuilder();
         StringBuilder containEventIdMethodCallB = new StringBuilder();
         containEventIdMethodCallB.append("log").append(logName).append("(");
@@ -125,7 +130,7 @@ class ConvertToTemplateEntity {
             }
         }
 
-        setterB.append("e.data.append(\"").append(logName).append("\").append(\"|\")");
+        molinSetterB.append("e.data.append(\"").append(logName).append("\").append(\"|\")");
 
         for (int i = 0; i < logTemplate.fields.size(); i++) {
             LogField field = logTemplate.fields.get(i);
@@ -158,39 +163,53 @@ class ConvertToTemplateEntity {
             }
 
             if (!fieldName.equals(LogTemplateLoader.OPERATOR_ID_NAME)) {
-                setterB.append(".append(");
+                final String value;
 
                 if (isSpecialArg(fieldName) && logTemplate.useSpecialArg) {
                     SpecialArg sArg = LogServiceGenerator.specialArgManager.get(fieldName);
                     if (removedArgClasses.containsKey(sArg.fromType())) {
                         String howToGet = removedArgClasses.get(sArg.fromType());
-                        setterB.append(howToGet).append(".").append(sArg.howToGet());
+
+                        value = howToGet + "." + sArg.howToGet();
                     } else {
                         if (sArg.fromType() != null) {
-                            setterB.append(StringUtil
-                                    .firstLetterToLowerCase(sArg.fromType().getSimpleName()))
-                                    .append(".").append(sArg.howToGet());
+                            value = StringUtil
+                                    .firstLetterToLowerCase(sArg.fromType().getSimpleName()) + "." + sArg.howToGet();
                         } else {
-                            setterB.append(sArg.howToGet());
+                            value = sArg.howToGet();
                         }
                     }
                 } else {
                     if (field.isBoolValue) {
-                        setterB.append(fieldName).append("?").append("1:0");
+                        value = fieldName + "? 1:0";
                     } else if (isDate) {
-                        setterB.append("logManager.formatter.print(")
-                                .append(fieldName).append(")");
+                        value = "logManager.formatter.print(" + fieldName + ")";
                     } else {
-                        setterB.append(fieldName);
+                        value = fieldName;
                     }
                 }
 
-                setterB.append(")");
+                molinArgsB.append("String ");
+                tencentArgsB.append("String ");
+                molinSetterB.append(".append(");
+                tencentSetterB.append("paramBuilder.append(\"&").append(field.tencentParamName).append("=\").append(");
+
+                methodCallArgsB.append("(").append(value).append(") + \"\"");
+                molinArgsB.append(fieldName);
+                tencentArgsB.append(fieldName);
+                molinSetterB.append(fieldName);
+                tencentSetterB.append(fieldName);
+
+                molinSetterB.append(")");
+                tencentSetterB.append(");");
 
                 if (!isLastField(i, logTemplate.fields)) {
-                    setterB.append(".append(\"|\")");
+                    methodCallArgsB.append(", ");
+                    molinArgsB.append(", ");
+                    tencentArgsB.append(", ");
+                    molinSetterB.append(".append(\"|\")");
                 } else {
-                    setterB.append(".append(\"\\n\");");
+                    molinSetterB.append(".append(\"\\n\");");
                 }
             }
         }
@@ -227,12 +246,15 @@ class ConvertToTemplateEntity {
         }
 
         return new LogEntityForTemplate(logName, logDescription, logRemark, fieldDescB.toString(),
-                args, "", setterB.toString(), importClasses, howToGetOperator, noEventIdArgs,
-                containEventIdMethodCall + ");", howToGetServerId, logTemplate.eventIdGenerateType);
+                args, "", molinSetterB.toString(), importClasses, howToGetOperator, noEventIdArgs,
+                containEventIdMethodCall + ");", howToGetServerId, logTemplate.eventIdGenerateType,
+                logTemplate.logType, methodCallArgsB.toString(), molinArgsB.toString(),
+                molinSetterB.toString(), tencentArgsB.toString(), tencentSetterB.toString(),
+                logTemplate.ioptype + "", logTemplate.iactionid + "", logTemplate.useSpeicalArgType.name());
     }
 
     private static boolean needShowInArgs(String fieldName, boolean needHaveOperatorIdArg,
-            LogTemplate logTemplate) {
+                                          LogTemplate logTemplate) {
 
         return (!fieldName.equals(LogTemplateLoader.IEVENT_ID) || logTemplate.eventIdGenerateType
                 .equals(EventIdGenerateType.AUTO_GENERATE_AND_PASS_IN.name()) ||

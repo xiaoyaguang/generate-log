@@ -19,9 +19,19 @@ import java.util.Map.Entry;
 public class LogGeneratorConfig {
 
     private String logConfigFilePath;
+
     private String logServiceDir;
     private String logServiceClassFileName;
     private String logServiceTemplateFilePath;
+
+    private String molinLogServiceDir;
+    private String molinLogServiceClassFileName;
+    private String molinLogServiceTemplateFilePath;
+
+    private String tencentLogServiceDir;
+    private String tencentLogServiceClassFileName;
+    private String tencentLogServiceTemplateFilePath;
+
     private Map<String, SpecialArgConfig> specialArgs;
     private Map<String, ReplaceArgConfig> replaceArgs;
 
@@ -39,6 +49,30 @@ public class LogGeneratorConfig {
 
     public String getLogServiceTemplateFilePath() {
         return logServiceTemplateFilePath;
+    }
+
+    public String getMolinLogServiceDir() {
+        return molinLogServiceDir;
+    }
+
+    public String getMolinLogServiceClassFileName() {
+        return molinLogServiceClassFileName;
+    }
+
+    public String getMolinLogServiceTemplateFilePath() {
+        return molinLogServiceTemplateFilePath;
+    }
+
+    public String getTencentLogServiceDir() {
+        return tencentLogServiceDir;
+    }
+
+    public String getTencentLogServiceClassFileName() {
+        return tencentLogServiceClassFileName;
+    }
+
+    public String getTencentLogServiceTemplateFilePath() {
+        return tencentLogServiceTemplateFilePath;
     }
 
     public List<SpecialArg> toSpecialArgList() {

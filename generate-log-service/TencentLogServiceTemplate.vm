@@ -1,0 +1,240 @@
+package com.qq.ptlogin2;
+
+import com.google.inject.Inject;
+
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import app.game.service.AsyncHttpClientService;
+import app.game.service.ITimeService;
+import app.game.service.ResetService.IResetPerHour;
+import app.game.service.ResetService.IResetPerMinute;
+import app.game.service.WorldService;
+import app.utils.IndividualServerConfig;
+
+/**
+ * 腾讯日志服务
+ * @author lml
+ * @create 2017 01 09 下午2:24
+ */
+public class TencentLogService implements IResetPerMinute, IResetPerHour {
+    public static final Logger logger = LoggerFactory.getLogger(TencentLogService.class);
+
+    private final TencentLogManager logManager;
+    private final ITimeService timeService;
+    private final WorldService worldService;
+    private final int appid;
+    private final long openTime;
+
+    @Inject
+    public TencentLogService(AsyncHttpClientService httpClientService, ITimeService timeService,
+            WorldService worldService, IndividualServerConfig individualServerConfig) {
+        this.logManager = new TencentLogManager(httpClientService, individualServerConfig);
+        this.timeService = timeService;
+        this.worldService = worldService;
+        this.appid = individualServerConfig.appid;
+
+        if (individualServerConfig.UNION_SERVICE_TIME > 0) {
+            this.openTime = individualServerConfig.UNION_SERVICE_TIME;
+        } else {
+            this.openTime = individualServerConfig.SERVICE_INTERCONNECTED_TIME;
+        }
+    }
+
+    private static final int WORLD_ID = 1;
+
+    private StringBuilder appendBasic(int opType, int actionId) {
+        return new StringBuilder("?").append("iversion=1").append("&iappid=").append(appid)
+                .append("&idomain=").append(0).append("&ioptype=").append(opType)
+                .append("&iactionid=").append(actionId).append("&iworldid=").append(WORLD_ID)
+                .append("&ieventTime=").append(getCurrentTime());
+    }
+
+
+
+    public long getCurrentTime() {
+        return timeService.getCurrentTime() / 1000;
+    }
+
+    @Override
+    public void resetPerMinute(long ctime) {
+        // 每分钟上报一次
+        onOnlineHero(worldService.getOnlineHeroCount());
+    }
+
+    @Override
+    public void resetPerHour(long oldResetHourTime, long newResetHourTime) {
+        int hour = new DateTime(newResetHourTime).getHourOfDay();
+        if (hour != 23) {
+            return;
+        }
+
+        onWorldInfo(openTime);
+    }
+
+    //    --特性的类型定义请从10开始定义。
+    //            --注意：这里的非特性定义ioptype和iactionid请按照规定上报 如创角色报 ioptype=0  iactionid=0
+    //
+    //    创建角色日志
+    //
+    //    vuin			openid
+    //    iuserip			客户端ip主机字节序
+    //    iroleId			角色id
+    //    ijobId			角色职业
+    private static final int OP_TYPE_CREATE_HERO = 0;
+    private static final int ACTION_CREATE_HERO = 0;
+
+    public void onCreateHero(String openId, String userIp, long heroId, int raceId) {
+        StringBuilder paramBuilder = appendBasic(OP_TYPE_CREATE_HERO, ACTION_CREATE_HERO);
+
+        paramBuilder.append("&vuin=").append(openId);
+        paramBuilder.append("&iuserip=").append(userIp);
+        paramBuilder.append("&iroleId=").append(heroId);
+        paramBuilder.append("&ijobId=").append(raceId);
+
+        logManager.push(paramBuilder.toString());
+    }
+
+    //
+    //
+    //    角色登入日志
+    //    vuin			openid
+    //    iuserip			客户端ip主机字节序
+    //    iroleId			角色id
+    //    ijobId			角色职业
+    //    ilevel			角色等级
+    //    vparam_1		角色经验值
+    //    iparam_16		角色剩余元宝-人民币相关
+    //    iparam_17		角色剩余绑定元宝
+    //    iparam_18		角色剩余赠送元宝
+    //    iparam_20		角色创建时间unix 时间戳
+    //    iparam_1		玩家总共在线时长(秒)
+
+    private static final int OP_TYPE_HERO_LOGIN = 1;
+    private static final int ACTION_ROLE_LOGIN = 0;
+
+    public void onHeroLogin(String openId, String userIp, long heroId, int raceId, int level,
+            long exp, long jinzi, long bandJinzi, long systemJinzi, long heroCreateTime,
+            long accOnlineTime) {
+        StringBuilder paramBuilder = appendBasic(OP_TYPE_HERO_LOGIN, ACTION_ROLE_LOGIN);
+
+        paramBuilder.append("&vuin=").append(openId);
+        paramBuilder.append("&iuserip=").append(userIp);
+        paramBuilder.append("&iroleId=").append(heroId);
+        paramBuilder.append("&ijobId=").append(raceId);
+
+        paramBuilder.append("&ilevel=").append(level);
+        paramBuilder.append("&vparam_1=").append(exp);
+        paramBuilder.append("&iparam_16=").append(jinzi);
+        paramBuilder.append("&iparam_17=").append(bandJinzi);
+        paramBuilder.append("&iparam_18=").append(systemJinzi);
+        paramBuilder.append("&iparam_20=").append(heroCreateTime / 1000);
+        paramBuilder.append("&iparam_1=").append(accOnlineTime / 1000);
+
+        logManager.push(paramBuilder.toString());
+    }
+
+    //
+    //    角色登出日志
+    //    vuin			openid
+    //    iuserip			客户端ip主机字节序
+    //    iroleId			角色id
+    //    ijobId			角色职业
+    //    ilevel			角色等级
+    //    vparam_1		角色经验值
+    //    iparam_16		角色剩余元宝-人民币相关
+    //    iparam_17		角色剩余绑定元宝
+    //    iparam_18		角色剩余赠送元宝
+    //    iparam_20		角色登陆时间unix 时间戳
+    //    iparam_1		玩家本次在线时长(秒)
+
+    private static final int ACTION_ROLE_LOGOUT = 1;
+
+    public void onHeroLogout(String openId, String userIp, long heroId, int raceId, int level,
+            long exp, long jinzi, long bandJinzi, long systemJinzi, long loginTime,
+            long onlineTime) {
+        StringBuilder paramBuilder = appendBasic(OP_TYPE_HERO_LOGIN, ACTION_ROLE_LOGOUT);
+
+        paramBuilder.append("&vuin=").append(openId);
+        paramBuilder.append("&iuserip=").append(userIp);
+        paramBuilder.append("&iroleId=").append(heroId);
+        paramBuilder.append("&ijobId=").append(raceId);
+
+        paramBuilder.append("&ilevel=").append(level);
+        paramBuilder.append("&vparam_1=").append(exp);
+        paramBuilder.append("&iparam_16=").append(jinzi);
+        paramBuilder.append("&iparam_17=").append(bandJinzi);
+        paramBuilder.append("&iparam_18=").append(systemJinzi);
+        paramBuilder.append("&iparam_20=").append(loginTime / 1000);
+        paramBuilder.append("&iparam_1=").append(Math.max(0, onlineTime) / 1000);
+
+        logManager.push(paramBuilder.toString());
+    }
+
+    //
+    //    在线角色数量统计
+    //    iparam_1		当前在线数量
+
+    private static final int OP_TYPE_ONLINE_HERO = 2;
+    private static final int ACTION_ONLINE_HERO = 0;
+
+    public void onOnlineHero(int onlineHeroCount) {
+        StringBuilder paramBuilder = appendBasic(OP_TYPE_ONLINE_HERO, ACTION_ONLINE_HERO);
+
+        paramBuilder.append("&iparam_1=").append(onlineHeroCount);
+
+        logManager.push(paramBuilder.toString());
+    }
+
+    //
+    //    大区信息列表--
+    //            --该表每天上报一次全量，时间可以选择在23点。
+    //    idomain			填0
+    //    vparam_1		大区名称
+    //    iparam_1                大区容量
+    //    iparam_2                大区IDC ID 没有IDC就填0
+    //    vparam_2                大区IDC名称 没有填空串
+    //    vparam_3                大区开服日期
+    //
+
+    private static final int OP_TYPE_WORLD_INFO = 4;
+    private static final int ACTION_WORLD_INFO = 0;
+
+    public void onWorldInfo(long openTime) {
+        StringBuilder paramBuilder = appendBasic(OP_TYPE_WORLD_INFO, ACTION_WORLD_INFO);
+
+        paramBuilder.append("&vparam_1=").append("御龙测试服");
+        paramBuilder.append("&iparam_1=").append("3000");
+        paramBuilder.append("&iparam_2=").append("0");
+        paramBuilder.append("&vparam_2=").append("");
+        paramBuilder.append("&vparam_3=").append(openTime / 1000);
+
+        logManager.push(paramBuilder.toString());
+    }
+
+#foreach($logMethod in $list)
+
+#if((${logMethod.logType} == "Tencent" || ${logMethod.logType} == "MolinAndTencent") && ${logMethod.useSpecialArgType} != "ALL")
+    /**
+	 * $logMethod.description
+	 * $logMethod.remark
+	 */
+	 public void log${logMethod.logName}(
+     		$logMethod.tencentArgs
+     	) {
+     	try {
+            StringBuilder paramBuilder = appendBasic(${logMethod.ioptype}, ${logMethod.iactionid});
+
+$logMethod.tencentSetter
+
+            logManager.push(paramBuilder.toString());
+        } catch (Exception e) {
+            logger.error("日志log${logMethod.logName}记录错误：", e);
+        }
+
+     }
+#end
+
+#end
+}
