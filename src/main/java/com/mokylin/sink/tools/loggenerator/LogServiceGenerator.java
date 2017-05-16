@@ -48,7 +48,7 @@ public class LogServiceGenerator {
 
         List<LogTemplate> logTemplates = LogTemplateLoader.loadLogTemplateFromXml(config.getLogConfigFilePath(), config.getLogTypeDefaultValue());
 
-        GenerateTencentReflection.generate(logTemplates, LoadTencentLogFormat.load());
+        GenerateTencentReflection.generate(config.getOutputTencentFormatFilePath(), logTemplates, LoadTencentLogFormat.load(config.getInputTencentFormatFilePath()));
 
         List<LogEntityForTemplate> logEntityList =
                 ConvertToTemplateEntity.convertToTemplateEntities(logTemplates);

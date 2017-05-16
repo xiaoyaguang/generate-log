@@ -34,6 +34,9 @@ public class LogGeneratorConfig {
     private String tencentLogServiceClassFileName;
     private String tencentLogServiceTemplateFilePath;
 
+    private String inputTencentFormatFilePath;
+    private String outputTencentFormatFilePath;
+
     private Map<String, SpecialArgConfig> specialArgs;
     private Map<String, ReplaceArgConfig> replaceArgs;
 
@@ -79,6 +82,14 @@ public class LogGeneratorConfig {
 
     public String getTencentLogServiceTemplateFilePath() {
         return tencentLogServiceTemplateFilePath;
+    }
+
+    public String getInputTencentFormatFilePath() {
+        return inputTencentFormatFilePath;
+    }
+
+    public String getOutputTencentFormatFilePath() {
+        return outputTencentFormatFilePath;
     }
 
     public List<SpecialArg> toSpecialArgList() {

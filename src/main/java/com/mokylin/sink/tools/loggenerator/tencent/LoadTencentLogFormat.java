@@ -16,12 +16,10 @@ import java.util.Map;
  */
 public class LoadTencentLogFormat {
 
-    public static ArrayListMultimap<String, String> load() {
-        String location = "generate-log-service/tencent_format.xlsx";
-
+    public static ArrayListMultimap<String, String> load(String inputTencentFormatFilePath) {
         ArrayListMultimap<String, String> reflection = ArrayListMultimap.create();
 
-        ExcelOperation.loadExcel(location, "Sheet1", new ExcelOperation.LoadRowOperation() {
+        ExcelOperation.loadExcel(inputTencentFormatFilePath, "Sheet1", new ExcelOperation.LoadRowOperation() {
             @Override
             public void load(Row row) {
                 if (row.getRowNum() < 14) {
@@ -40,24 +38,6 @@ public class LoadTencentLogFormat {
         });
 
         return reflection;
-    }
-
-    public static void main(String[] args) {
-        ListMultimap<String, String> load = load();
-
-        System.out.println("start print");
-
-        for (Map.Entry<String, Collection<String>> entry : load.asMap().entrySet()) {
-            System.out.println(entry.getKey());
-
-            for (String paramName : entry.getValue()) {
-                System.out.println("--------" + paramName);
-            }
-
-            System.out.println();
-        }
-
-        System.out.println("end print");
     }
 
 }

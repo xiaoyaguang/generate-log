@@ -42,18 +42,16 @@ public class GenerateTencentReflection {
 
         List<LogTemplate> logTemplates = LogTemplateLoader.loadLogTemplateFromXml(config.getLogConfigFilePath(), config.getLogTypeDefaultValue());
 
-        generate(logTemplates, LoadTencentLogFormat.load());
+        generate(config.getOutputTencentFormatFilePath(), logTemplates, LoadTencentLogFormat.load(config.getInputTencentFormatFilePath()));
     }
 
-    public static void generate(List<LogTemplate> logTmpls, ArrayListMultimap<String, String> paramReflection) {
-        String path = "generate-log-service/tencent_param_format.xlsx";
-
+    public static void generate(String outputTencentFormatFilePath, List<LogTemplate> logTmpls, ArrayListMultimap<String, String> paramReflection) {
         Table<Integer, Integer, Integer> optypeActionid = HashBasedTable.create();
 
 
-        new File(path).delete();
+        new File(outputTencentFormatFilePath).delete();
 
-        ExcelOperation.createExcel(path, new ExcelOperation.ModifyWorkbookOperation() {
+        ExcelOperation.createExcel(outputTencentFormatFilePath, new ExcelOperation.ModifyWorkbookOperation() {
             @Override
             public void modify(Workbook wb, CellStyle cellStyle) {
                 Sheet sheet = wb.createSheet(SHEET_NAME);
