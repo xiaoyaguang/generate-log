@@ -35,7 +35,7 @@ public class MolinLogService {
 	 * $logMethod.remark
 	 */
 	public void log${logMethod.logName}(
-			$logMethod.molinArgs
+			$logMethod.molinArgs, int operatorID
 		) {
 		try {
 
@@ -43,7 +43,7 @@ public class MolinLogService {
             long sequence = ringBuffer.next();
             try {
                 LogEvent e = ringBuffer.get(sequence);
-                e.operatorID = $logMethod.howToGetOperator;
+                e.operatorID = operatorID;
 
 $logMethod.molinSetter
             } finally {

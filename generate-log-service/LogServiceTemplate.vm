@@ -85,10 +85,10 @@ $logMethod.fieldDescription
 #if(${logMethod.logType} == "Tencent")
             tencentLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
 #elseif(${logMethod.logType} == "Molin")
-            molinLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
+            molinLogService.log${logMethod.logName}(${logMethod.methodCallArgs}, $logMethod.howToGetOperator);
 #elseif(${logMethod.logType} == "MolinAndTencent")
             tencentLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
-            molinLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
+            molinLogService.log${logMethod.logName}(${logMethod.methodCallArgs}, $logMethod.howToGetOperator);
 #end
 
 		} catch (Exception e) {
