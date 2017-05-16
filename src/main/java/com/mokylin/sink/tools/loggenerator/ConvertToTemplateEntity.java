@@ -182,8 +182,6 @@ class ConvertToTemplateEntity {
                 } else {
                     if (field.isBoolValue) {
                         value = fieldName + "? 1:0";
-                    } else if (isDate) {
-                        value = "logManager.formatter.print(" + fieldName + ")";
                     } else {
                         value = fieldName;
                     }
@@ -197,7 +195,12 @@ class ConvertToTemplateEntity {
                 methodCallArgsB.append("(").append(value).append(") + \"\"");
                 molinArgsB.append(fieldName);
                 tencentArgsB.append(fieldName);
-                molinSetterB.append(fieldName);
+                if (isDate) {
+                    molinSetterB.append("logManager.formatter.print(Long.parseLong(").append(fieldName).append("))");
+                } else {
+                    molinSetterB.append(fieldName);
+                }
+
                 tencentSetterB.append(fieldName);
 
                 molinSetterB.append(")");

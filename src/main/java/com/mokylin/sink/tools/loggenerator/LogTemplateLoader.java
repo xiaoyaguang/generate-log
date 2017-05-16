@@ -147,7 +147,7 @@ public class LogTemplateLoader {
     }
 
     private static String loadLogType(Element structElement, String logTypeDefaultValue, String logName) {
-        String logType = structElement.getAttribute("log_type");
+        String logType = structElement.getAttribute("logtype");
         if (Strings.isNullOrEmpty(logType)) {
             logType = logTypeDefaultValue;
         }

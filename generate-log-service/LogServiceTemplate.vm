@@ -86,7 +86,7 @@ $logMethod.fieldDescription
             tencentLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
 #elseif(${logMethod.logType} == "Molin")
             molinLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
-#elseif(${logMethod.logType} == "TencentAndMolin")
+#elseif(${logMethod.logType} == "MolinAndTencent")
             tencentLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
             molinLogService.log${logMethod.logName}(${logMethod.methodCallArgs});
 #end
