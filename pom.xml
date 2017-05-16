@@ -6,7 +6,7 @@
 
     <groupId>com.mokylin</groupId>
     <artifactId>loggenerator</artifactId>
-    <version>0.0.8</version>
+    <version>0.0.10</version>
 
     <repositories>
         <repository>

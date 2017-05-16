@@ -20,6 +20,8 @@ public class LogGeneratorConfig {
 
     private String logConfigFilePath;
 
+    private String logTypeDefaultValue;
+
     private String logServiceDir;
     private String logServiceClassFileName;
     private String logServiceTemplateFilePath;
@@ -37,6 +39,10 @@ public class LogGeneratorConfig {
 
     public String getLogConfigFilePath() {
         return logConfigFilePath;
+    }
+
+    public String getLogTypeDefaultValue() {
+        return logTypeDefaultValue;
     }
 
     public String getLogServiceDir() {

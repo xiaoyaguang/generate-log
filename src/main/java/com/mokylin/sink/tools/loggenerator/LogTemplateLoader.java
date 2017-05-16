@@ -62,7 +62,7 @@ public class LogTemplateLoader {
 
     }
 
-    public static List<LogTemplate> loadLogTemplateFromXml(final String path)
+    public static List<LogTemplate> loadLogTemplateFromXml(final String path, String logTypeDefaultValue)
             throws ParserConfigurationException, IOException, SAXException {
         File file = new File(path);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -77,7 +77,7 @@ public class LogTemplateLoader {
         for (int i = 0; i < structNodes.getLength(); i++) {
             Node structNode = structNodes.item(i);
             if (structNode.getNodeType() == Node.ELEMENT_NODE) {
-                LogTemplate logTemplate = loadLogTemplate((Element) structNode);
+                LogTemplate logTemplate = loadLogTemplate((Element) structNode, logTypeDefaultValue);
 
                 if (logNames.contains(logTemplate.logName)) {
                     throw new RuntimeException("有重复日志：" + logTemplate.logName);
@@ -95,7 +95,7 @@ public class LogTemplateLoader {
         return logTemplateList;
     }
 
-    private static LogTemplate loadLogTemplate(Element structElement) {
+    private static LogTemplate loadLogTemplate(Element structElement, String logTypeDefaultValue) {
         String logName = structElement.getAttribute("name");
         if (Strings.isNullOrEmpty(logName)) {
             throw new RuntimeException("竟然有个日志没有填名字！！！");
@@ -110,7 +110,7 @@ public class LogTemplateLoader {
 
         String eventIdGenerateType = loadLogEventGenerateType(structElement, logName);
 
-        String logType = loadLogType(structElement, logName);
+        String logType = loadLogType(structElement, logTypeDefaultValue, logName);
 
         int ioptype = Integer.parseInt(structElement.getAttribute("ioptype"));
         int iactionid = Integer.parseInt(structElement.getAttribute("iactionid"));
@@ -146,10 +146,10 @@ public class LogTemplateLoader {
         return new LogTemplate(ioptype, iactionid, logName, logDesc, "", eventIdGenerateType, fields, dontUseSpecialArg, logType, useSpeicalArgType);
     }
 
-    private static String loadLogType(Element structElement, String logName) {
+    private static String loadLogType(Element structElement, String logTypeDefaultValue, String logName) {
         String logType = structElement.getAttribute("log_type");
         if (Strings.isNullOrEmpty(logType)) {
-            logType = LogType.Tencent.name();
+            logType = logTypeDefaultValue;
         }
 
         boolean valid = false;

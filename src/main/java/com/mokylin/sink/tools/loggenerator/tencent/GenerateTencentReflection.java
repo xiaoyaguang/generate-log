@@ -40,7 +40,7 @@ public class GenerateTencentReflection {
                 ConfigBuilder.buildConfigFromFileName(
                         args[0] + "/log_generator.config", LogGeneratorConfig.class);
 
-        List<LogTemplate> logTemplates = LogTemplateLoader.loadLogTemplateFromXml(config.getLogConfigFilePath());
+        List<LogTemplate> logTemplates = LogTemplateLoader.loadLogTemplateFromXml(config.getLogConfigFilePath(), config.getLogTypeDefaultValue());
 
         generate(logTemplates, LoadTencentLogFormat.load());
     }
