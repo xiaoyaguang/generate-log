@@ -113,7 +113,7 @@ public class LogServiceGenerator {
         } catch (FormatterException e) {
             e.printStackTrace();
         } finally {
-            System.out.println(logServiceTemplateFilePath);
+            System.out.println(logServiceDir + logServiceClassFileName);
         }
     }
 }
