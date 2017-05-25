@@ -14,6 +14,7 @@ import com.mokylin.sink.tools.loggenerator.component.LogTemplate;
 import com.mokylin.sink.tools.loggenerator.component.ReplaceArg;
 import com.mokylin.sink.tools.loggenerator.component.SpecialArg;
 import com.mokylin.sink.tools.loggenerator.component.TypeInfo;
+import com.mokylin.sink.tools.loggenerator.tencent.TencentParamFixParamName;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -191,11 +192,9 @@ class ConvertToTemplateEntity {
 
                 boolean isEventId = fieldName.equals(LogTemplateLoader.IEVENT_ID);
 
-
                 molinSetterB.append(".append(");
                 molinArgsB.append("String ");
-                molinMethodCallArgsB.append("(").append(value).append(")");
-                molinMethodCallArgsB.append(" + \"\"");
+                molinMethodCallArgsB.append("(").append(value).append(") + \"\"");
                 if (isDate) {
                     molinSetterB.append("logManager.formatter.print(Long.parseLong(").append(fieldName).append("))");
                 } else {
@@ -208,8 +207,10 @@ class ConvertToTemplateEntity {
                 if (!isEventId) {
                     tencentArgsB.append("String ");
                     tencentSetterB.append("paramBuilder.append(\"&").append(field.tencentParamName).append("=\").append(");
-                    if (isDate) {
+                    if (isDate || field.isTime) {
                         tencentMethodCallArgsB.append("(").append(value).append(" / 1000) + \"\"");
+                    } else if (TencentParamFixParamName.iroleId.name().equals(field.tencentParamName)) {
+                        tencentMethodCallArgsB.append("(IDUtils.getUserID(").append(value).append(")) + \"\"");
                     } else {
                         tencentMethodCallArgsB.append("(").append(value).append(") + \"\"");
                     }

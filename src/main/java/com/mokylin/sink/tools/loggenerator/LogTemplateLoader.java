@@ -119,7 +119,7 @@ public class LogTemplateLoader {
         NodeList entryNodes = structElement.getElementsByTagName("entry");
         List<LogField> fields = Lists.newArrayListWithCapacity(entryNodes.getLength() + 1);
         fields.add(
-                new LogField("uint", OPERATOR_ID_NAME, "平台Id", "", false)); // 每个日志都需要平台id，但是字段里面是不需要记录平台Id的
+                new LogField("uint", OPERATOR_ID_NAME, "平台Id", "", false, false)); // 每个日志都需要平台id，但是字段里面是不需要记录平台Id的
         Set<String> fieldNames = Sets.newHashSet();
         fieldNames.add(OPERATOR_ID_NAME);
         for (int i = 0; i < entryNodes.getLength(); i++) {
@@ -217,6 +217,9 @@ public class LogTemplateLoader {
         String isBoolStr = entryElement.getAttribute("is_bool");
         boolean isBoolValue = isBoolStr != null && isBoolStr.equals("true");
 
-        return new LogField(fieldType, fieldName, fieldDesc, "", isBoolValue);
+        String isTimeStr = entryElement.getAttribute("is_time");
+        boolean isTime = isTimeStr != null && isTimeStr.equals("true");
+
+        return new LogField(fieldType, fieldName, fieldDesc, "", isBoolValue, isTime);
     }
 }

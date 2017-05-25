@@ -12,6 +12,7 @@ public class LogField {
     public final String description;
     public final String remark;
     public final boolean isBoolValue;
+    public final boolean isTime;
     public String tencentParamName;
 
     /**
@@ -22,12 +23,13 @@ public class LogField {
      * @param isBoolValue 是否是bool类型
      */
     public LogField(String type, String name, String description, String remark,
-                    boolean isBoolValue) {
+                    boolean isBoolValue, boolean isTime) {
         this.type = type;
         this.name = name;
         this.description = description;
         this.remark = remark;
         this.isBoolValue = isBoolValue;
+        this.isTime = isTime;
     }
 
 }
