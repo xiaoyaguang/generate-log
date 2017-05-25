@@ -24,11 +24,12 @@ public class LogEntityForTemplate {
     private String howToGetOperator;
     private String howToGetServerId;
     private String logType;
-    private String methodCallArgs;
 
+    private String molinMethodCallArgs;
     private String molinArgs;
     private String molinSetter;
 
+    private String tencentMethodCallArgs;
     private String tencentArgs;
     private String tencentSetter;
     private String ioptype;
@@ -38,8 +39,8 @@ public class LogEntityForTemplate {
                                 String remark, String fieldDescription, String args, String prefix, String setter,
                                 Set<String> importClasses, String howToGetOperator, String noEventIdArgs,
                                 String containEventIdMethodCall, String howToGetServerId,
-                                String eventIdGenerateType, String logType, String methodCallArgs, String molinArgs,
-                                String molinSetter, String tencentArgs, String tencentSetter,
+                                String eventIdGenerateType, String logType, String molinMethodCallArgs, String molinArgs,
+                                String molinSetter, String tencentMethodCallArgs, String tencentArgs, String tencentSetter,
                                 String ioptype, String iactionid, String useSpecialArgType) {
         this.logName = logName;
         this.description = description;
@@ -55,9 +56,10 @@ public class LogEntityForTemplate {
         this.howToGetServerId = howToGetServerId;
         this.eventIdGenerateType = eventIdGenerateType;
         this.logType = logType;
-        this.methodCallArgs = methodCallArgs;
+        this.molinMethodCallArgs = molinMethodCallArgs;
         this.molinArgs = molinArgs;
         this.molinSetter = molinSetter;
+        this.tencentMethodCallArgs = tencentMethodCallArgs;
         this.tencentArgs = tencentArgs;
         this.tencentSetter = tencentSetter;
         this.ioptype = ioptype;
@@ -121,8 +123,8 @@ public class LogEntityForTemplate {
         return logType;
     }
 
-    public String getMethodCallArgs() {
-        return methodCallArgs;
+    public String getMolinMethodCallArgs() {
+        return molinMethodCallArgs;
     }
 
     public String getMolinArgs() {
@@ -131,6 +133,10 @@ public class LogEntityForTemplate {
 
     public String getMolinSetter() {
         return molinSetter;
+    }
+
+    public String getTencentMethodCallArgs() {
+        return tencentMethodCallArgs;
     }
 
     public String getTencentArgs() {

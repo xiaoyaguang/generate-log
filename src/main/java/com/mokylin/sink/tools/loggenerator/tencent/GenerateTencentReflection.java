@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import com.google.googlejavaformat.Indent;
 
 import com.mokylin.sink.tools.config.ConfigBuilder;
 import com.mokylin.sink.tools.loggenerator.LogTemplateLoader;
@@ -34,16 +35,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class GenerateTencentReflection {
 
     private static final String SHEET_NAME = "format";
-
-    public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException {
-        LogGeneratorConfig config =
-                ConfigBuilder.buildConfigFromFileName(
-                        args[0] + "/log_generator.config", LogGeneratorConfig.class);
-
-        List<LogTemplate> logTemplates = LogTemplateLoader.loadLogTemplateFromXml(config.getLogConfigFilePath(), config.getLogTypeDefaultValue());
-
-        generate(config.getOutputTencentFormatFilePath(), logTemplates, LoadTencentLogFormat.load(config.getInputTencentFormatFilePath()));
-    }
 
     public static void generate(String outputTencentFormatFilePath, List<LogTemplate> logTmpls, ArrayListMultimap<String, String> paramReflection) {
         Table<Integer, Integer, Integer> optypeActionid = HashBasedTable.create();
@@ -94,6 +85,10 @@ public class GenerateTencentReflection {
                         }
 
                         String fixParamName = TencentParamFixParamName.getFixParamName(field.name);
+
+                        if (TencentParamFixParamName.ieventId.name().equals(fixParamName)) {
+                            continue;
+                        }
 
                         final String paramName;
                         if (fixParamName != null) {

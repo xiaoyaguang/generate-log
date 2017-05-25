@@ -39,7 +39,8 @@ class ConvertToTemplateEntity {
         String logDescription = logTemplate.logDescprition;
         String logRemark = logTemplate.logRemark;
         StringBuilder argsB = new StringBuilder();
-        StringBuilder methodCallArgsB = new StringBuilder();
+        StringBuilder molinMethodCallArgsB = new StringBuilder();
+        StringBuilder tencentMethodCallArgsB = new StringBuilder();
         StringBuilder molinArgsB = new StringBuilder();
         StringBuilder molinSetterB = new StringBuilder();
         StringBuilder tencentArgsB = new StringBuilder();
@@ -187,29 +188,45 @@ class ConvertToTemplateEntity {
                     }
                 }
 
-                molinArgsB.append("String ");
-                tencentArgsB.append("String ");
-                molinSetterB.append(".append(");
-                tencentSetterB.append("paramBuilder.append(\"&").append(field.tencentParamName).append("=\").append(");
 
-                methodCallArgsB.append("(").append(value).append(") + \"\"");
-                molinArgsB.append(fieldName);
-                tencentArgsB.append(fieldName);
+                boolean isEventId = fieldName.equals(LogTemplateLoader.IEVENT_ID);
+
+
+                molinSetterB.append(".append(");
+                molinArgsB.append("String ");
+                molinMethodCallArgsB.append("(").append(value).append(")");
+                molinMethodCallArgsB.append(" + \"\"");
                 if (isDate) {
                     molinSetterB.append("logManager.formatter.print(Long.parseLong(").append(fieldName).append("))");
                 } else {
                     molinSetterB.append(fieldName);
                 }
-
-                tencentSetterB.append(fieldName);
-
+                molinArgsB.append(fieldName);
                 molinSetterB.append(")");
-                tencentSetterB.append(");");
+
+
+                if (!isEventId) {
+                    tencentArgsB.append("String ");
+                    tencentSetterB.append("paramBuilder.append(\"&").append(field.tencentParamName).append("=\").append(");
+                    if (isDate) {
+                        tencentMethodCallArgsB.append("(").append(value).append(" / 1000) + \"\"");
+                    } else {
+                        tencentMethodCallArgsB.append("(").append(value).append(") + \"\"");
+                    }
+
+                    tencentArgsB.append(fieldName);
+                    tencentSetterB.append(fieldName);
+                    tencentSetterB.append(");");
+                }
+
 
                 if (!isLastField(i, logTemplate.fields)) {
-                    methodCallArgsB.append(", ");
+                    molinMethodCallArgsB.append(", ");
                     molinArgsB.append(", ");
-                    tencentArgsB.append(", ");
+                    if (!isEventId) {
+                        tencentArgsB.append(", ");
+                        tencentMethodCallArgsB.append(", ");
+                    }
                     molinSetterB.append(".append(\"|\")");
                 } else {
                     molinSetterB.append(".append(\"\\n\");");
@@ -251,8 +268,8 @@ class ConvertToTemplateEntity {
         return new LogEntityForTemplate(logName, logDescription, logRemark, fieldDescB.toString(),
                 args, "", molinSetterB.toString(), importClasses, howToGetOperator, noEventIdArgs,
                 containEventIdMethodCall + ");", howToGetServerId, logTemplate.eventIdGenerateType,
-                logTemplate.logType, methodCallArgsB.toString(), molinArgsB.toString(),
-                molinSetterB.toString(), tencentArgsB.toString(), tencentSetterB.toString(),
+                logTemplate.logType, molinMethodCallArgsB.toString(), molinArgsB.toString(),
+                molinSetterB.toString(), tencentMethodCallArgsB.toString(), tencentArgsB.toString(), tencentSetterB.toString(),
                 logTemplate.ioptype + "", logTemplate.iactionid + "", logTemplate.useSpeicalArgType.name());
     }
 

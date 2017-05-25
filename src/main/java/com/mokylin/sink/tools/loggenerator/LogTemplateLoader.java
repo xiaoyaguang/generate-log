@@ -62,7 +62,7 @@ public class LogTemplateLoader {
 
     }
 
-    public static List<LogTemplate> loadLogTemplateFromXml(final String path, String logTypeDefaultValue)
+    public static List<LogTemplate> loadLogTemplateFromXml(final String path, String logTypeDefaultValue, int minIoptype)
             throws ParserConfigurationException, IOException, SAXException {
         File file = new File(path);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -77,7 +77,7 @@ public class LogTemplateLoader {
         for (int i = 0; i < structNodes.getLength(); i++) {
             Node structNode = structNodes.item(i);
             if (structNode.getNodeType() == Node.ELEMENT_NODE) {
-                LogTemplate logTemplate = loadLogTemplate((Element) structNode, logTypeDefaultValue);
+                LogTemplate logTemplate = loadLogTemplate((Element) structNode, logTypeDefaultValue, minIoptype);
 
                 if (logNames.contains(logTemplate.logName)) {
                     throw new RuntimeException("有重复日志：" + logTemplate.logName);
@@ -95,7 +95,7 @@ public class LogTemplateLoader {
         return logTemplateList;
     }
 
-    private static LogTemplate loadLogTemplate(Element structElement, String logTypeDefaultValue) {
+    private static LogTemplate loadLogTemplate(Element structElement, String logTypeDefaultValue, int minIoptype) {
         String logName = structElement.getAttribute("name");
         if (Strings.isNullOrEmpty(logName)) {
             throw new RuntimeException("竟然有个日志没有填名字！！！");
@@ -113,6 +113,7 @@ public class LogTemplateLoader {
         String logType = loadLogType(structElement, logTypeDefaultValue, logName);
 
         int ioptype = Integer.parseInt(structElement.getAttribute("ioptype"));
+        checkArgument(ioptype >= minIoptype, "日志的ioptype必须大于等于%s, logName:%s", minIoptype, logName);
         int iactionid = Integer.parseInt(structElement.getAttribute("iactionid"));
 
         NodeList entryNodes = structElement.getElementsByTagName("entry");

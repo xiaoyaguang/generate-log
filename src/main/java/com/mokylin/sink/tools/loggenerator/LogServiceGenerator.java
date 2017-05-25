@@ -46,7 +46,7 @@ public class LogServiceGenerator {
 
         replaceArgManager = new ReplaceArgManager(config.toReplaceArgList());
 
-        List<LogTemplate> logTemplates = LogTemplateLoader.loadLogTemplateFromXml(config.getLogConfigFilePath(), config.getLogTypeDefaultValue());
+        List<LogTemplate> logTemplates = LogTemplateLoader.loadLogTemplateFromXml(config.getLogConfigFilePath(), config.getLogTypeDefaultValue(), config.getMinIoptype());
 
         GenerateTencentReflection.generate(config.getOutputTencentFormatFilePath(), logTemplates, LoadTencentLogFormat.load(config.getInputTencentFormatFilePath()));
 

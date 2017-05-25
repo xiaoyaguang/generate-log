@@ -67,6 +67,7 @@
         <entry name="iOnlineTotalTime" type="uint" size="" desc="角色总在线时长"/>
 
         <entry name="iLoginWay" type="uint" size="" desc="登录渠道"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
 
     </struct>
 
@@ -106,6 +107,7 @@
 
         <entry name="iChapterTaskId" type="uint" size="" desc="下线前未完成的主线任务id，0表示全部完成"/>
         <entry name="iActivityPoint" type="uint" size="" desc="当天活跃值"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <!-- 创建角色 -->
@@ -306,6 +308,7 @@
         <entry name="iMoney" type="bigint" size="" desc="动作涉及的金钱数"/>
         <entry name="iMoneyType" type="uint" size="" desc="金钱的类型"/>
         <entry name="iOperate" type="uint" size="" desc="操作类型"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <!--现金流流出日志 -->
@@ -324,6 +327,7 @@
         <entry name="iMoney" type="bigint" size="" desc="动作涉及的金钱数"/>
         <entry name="iMoneyType" type="uint" size="" desc="金钱的类型"/>
         <entry name="iOperate" type="uint" size="" desc="操作类型"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <!-- 物品流流入日志 -->
@@ -339,6 +343,7 @@
         <entry name="vGoodsName" type="string" size="60" desc="物品名字"/>
         <entry name="iCount" type="uint" index="1" desc="个数"/>
         <entry name="iTotalCount" type="uint" index="1" desc="动作后的道具总个数"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <!-- 物品流流出日志 -->
@@ -355,6 +360,7 @@
         <entry name="vGoodsName" type="string" size="60" desc="物品名字"/>
         <entry name="iCount" type="uint" index="1" desc="个数"/>
         <entry name="iTotalCount" type="uint" index="1" desc="动作后的道具总个数"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <struct name="TaskAccept" id="" desc="任务接取" ioptype="14" iactionid="0">
@@ -670,6 +676,7 @@
         <entry name="iKillCount" type="bigint" index="1" desc="击杀人次"/>
         <entry name="iBeenKillTimes" type="bigint" index="1" desc="被击杀人次"/>
         <entry name="vCountryName" type="string" index="1" desc="国家名称"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <!--角色付费点-->
@@ -797,6 +804,7 @@
         <entry name="iFighting" type="bigint" size="" desc="角色战力值"/>
         <entry name="iQualityTaozLevel" type="uint" size="" desc="多少级品质套装"/>
         <entry name="iQualityTaozQuality" type="uint" size="" desc="品质套装"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <!--活跃玩家星套分布-->
@@ -812,6 +820,7 @@
         <entry name="iFighting" type="bigint" size="" desc="角色战力值"/>
         <entry name="iQiangHuaTaozLevel" type="uint" size="" desc="多少级强化套装"/>
         <entry name="iQiangHuaTaozStar" type="uint" size="" desc="多少强化套装"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <!--活跃玩家精炼套分布-->
@@ -827,6 +836,7 @@
         <entry name="iFighting" type="bigint" size="" desc="角色战力值"/>
         <entry name="iJingLianTaozLevel" type="uint" size="" desc="多少级精炼套装"/>
         <entry name="iJingLianTaozJingLianLevel" type="uint" size="" desc="精炼套装"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 
     <!--活跃玩家血纹等级分布-->
@@ -841,5 +851,6 @@
         <entry name="iJobId" type="utinyint" size="" desc="角色职业"/>
         <entry name="iFighting" type="bigint" size="" desc="角色战力值"/>
         <entry name="iBloodLine" type="uint" size="" desc="血纹等级"/>
+        <entry name="iCountry" type="uint" index="1" desc="国家"/>
     </struct>
 </metalib>

@@ -34,6 +34,7 @@ public class LogGeneratorConfig {
     private String tencentLogServiceClassFileName;
     private String tencentLogServiceTemplateFilePath;
 
+    private int minIoptype;
     private String inputTencentFormatFilePath;
     private String outputTencentFormatFilePath;
 
@@ -82,6 +83,10 @@ public class LogGeneratorConfig {
 
     public String getTencentLogServiceTemplateFilePath() {
         return tencentLogServiceTemplateFilePath;
+    }
+
+    public int getMinIoptype() {
+        return minIoptype;
     }
 
     public String getInputTencentFormatFilePath() {
