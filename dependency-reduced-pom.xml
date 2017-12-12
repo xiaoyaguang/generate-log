@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.mokylin</groupId>
   <artifactId>loggenerator</artifactId>
-  <version>0.0.18</version>
+  <version>0.0.22</version>
   <build>
     <plugins>
       <plugin>
@@ -64,20 +64,20 @@
       </snapshots>
       <id>central</id>
       <name>libs-release</name>
-      <url>http://mvn.molin.games/artifactory/libs-release</url>
+      <url>http://106.75.133.57/artifactory/libs-release</url>
     </repository>
     <repository>
       <snapshots />
       <id>snapshots</id>
       <name>libs-snapshot</name>
-      <url>http://mvn.molin.games/artifactory/libs-snapshot</url>
+      <url>http://106.75.133.57/artifactory/libs-snapshot</url>
     </repository>
   </repositories>
   <distributionManagement>
     <repository>
       <id>central</id>
       <name>molin-releases</name>
-      <url>http://mvn.molin.games/artifactory/libs-release-local</url>
+      <url>http://106.75.133.57/artifactory/libs-release-local</url>
     </repository>
   </distributionManagement>
 </project>

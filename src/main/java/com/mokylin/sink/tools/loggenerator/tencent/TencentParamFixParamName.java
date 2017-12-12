@@ -5,14 +5,8 @@ package com.mokylin.sink.tools.loggenerator.tencent;
  */
 public enum TencentParamFixParamName {
 
-    iversion("iVersion"),
-    iuserip("vClientIp"),
-    iworldid("iWorldId"),
-    vuin("iUin"),
-    ieventId("iEventId"),
-    ieventTime("dtEventTime"),
-    iroleId("iRoleId"),
-    ijobId("iJobId"),
+    iversion("iVersion"), iuserip("vClientIp"), iworldid("iWorldId"), vuin("iUin"),
+    ieventId("iEventId"), ieventTime("dtEventTime"), iroleId("iRoleId"), ijobId("iJobId"),
     ilevel("iRoleLevel"),;
 
     public final String molinParamName;
@@ -22,7 +16,8 @@ public enum TencentParamFixParamName {
     }
 
     public static String getFixParamName(String molinParamName) {
-        for (TencentParamFixParamName tencentParamFixParamName : TencentParamFixParamName.values()) {
+        for (TencentParamFixParamName tencentParamFixParamName : TencentParamFixParamName
+                .values()) {
             if (molinParamName.equals(tencentParamFixParamName.molinParamName)) {
                 return tencentParamFixParamName.name();
             }
@@ -33,6 +28,7 @@ public enum TencentParamFixParamName {
 
     public static String convertMolinParamTypeToTencentParamType(String molinParamType) {
         switch (molinParamType) {
+            case "int":
             case "uint":
             case "bigint":
             case "datetime":

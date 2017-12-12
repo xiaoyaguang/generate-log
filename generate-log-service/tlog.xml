@@ -545,7 +545,7 @@
         <entry name="vRoleName" type="string" size="60" desc="角色名"/>
         <entry name="iRoleLevel" type="uint" size="" desc="角色等级"/>
         <entry name="iJobId" type="utinyint" size="" desc="角色职业"/>
-        <entry name="iAcceptTime" type="bigint" size="" desc="接受时间"/>
+        <entry name="iAcceptTime" type="bigint" is_time="true" size="" desc="接受时间"/>
         <entry name="iTimes" type="uint" size="" desc="当天第几次"/>
         <entry name="iQuality" type="uint" size="" desc="颜色id"/>
         <entry name="iType" type="uint" size="" desc="类型 1:接取，2:完成"/>
@@ -560,7 +560,7 @@
         <entry name="vRoleName" type="string" size="60" desc="角色名"/>
         <entry name="iRoleLevel" type="uint" size="" desc="角色等级"/>
         <entry name="iJobId" type="utinyint" size="" desc="角色职业"/>
-        <entry name="iAcceptTime" type="bigint" size="" desc="接受时间"/>
+        <entry name="iAcceptTime" type="bigint" is_time="true" size="" desc="接受时间"/>
         <entry name="iTimes" type="uint" size="" desc="当天第几次"/>
         <entry name="iQuality" type="uint" size="" desc="颜色id"/>
         <entry name="iType" type="uint" size="" desc="类型 1:接取，2:完成"/>
@@ -575,7 +575,7 @@
         <entry name="vRoleName" type="string" size="60" desc="角色名"/>
         <entry name="iRoleLevel" type="uint" size="" desc="角色等级"/>
         <entry name="iJobId" type="utinyint" size="" desc="角色职业"/>
-        <entry name="iAcceptTime" type="bigint" size="" desc="接受时间"/>
+        <entry name="iAcceptTime" type="bigint" is_time="true" size="" desc="接受时间"/>
         <entry name="iTimes" type="uint" size="" desc="当天第几次"/>
         <entry name="iQuality" type="uint" size="" desc="颜色id"/>
         <entry name="iDestroy" type="uint" size="" desc="是否被砸 1: 是, 0: 否"/>
@@ -721,7 +721,7 @@
         <entry name="iRoleId" type="bigint" index="1" desc="角色ID"/>
         <entry name="iCountry" type="uint" index="1" desc="国家"/>
         <entry name="vCountryName" type="string" index="1" desc="国家名称"/>
-        <entry name="iRacingTime" type="bigint" index="1" desc="本次赛马用时"/>
+        <entry name="iRacingTime" type="bigint" is_time="true" index="1" desc="本次赛马用时"/>
         <entry name="iRacingRank" type="uint" index="1" desc="本国赛马排名"/>
         <entry name="iRacingWorldRank" type="uint" index="1" desc="全服赛马排名"/>
     </struct>
@@ -735,7 +735,7 @@
         <entry name="iRoleId" type="bigint" index="1" desc="角色ID"/>
         <entry name="iCountry" type="uint" index="1" desc="国家"/>
         <entry name="vCountryName" type="string" index="1" desc="国家名称"/>
-        <entry name="iMazeTime" type="bigint" index="1" desc="本次迷宫用时"/>
+        <entry name="iMazeTime" type="bigint" is_time="true" index="1" desc="本次迷宫用时"/>
         <entry name="iMazeRank" type="uint" index="1" desc="本国迷宫排名"/>
         <entry name="iMazeWorldRank" type="uint" index="1" desc="全服迷宫排名"/>
     </struct>

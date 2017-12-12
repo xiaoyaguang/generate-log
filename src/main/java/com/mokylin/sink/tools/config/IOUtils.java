@@ -96,8 +96,7 @@ public class IOUtils {
      * @throws IOException
      */
     public static String readAndClose(InputStream in, String charset, boolean isNeedLineBreak)
-            throws
-            IOException {
+            throws IOException {
         try (InputStreamReader isr = new InputStreamReader(in, charset);
                 BufferedReader br = new BufferedReader(isr)) {
             StringBuilder builder = new StringBuilder();

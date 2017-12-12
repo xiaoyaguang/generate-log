@@ -37,12 +37,10 @@ public class LogTemplateLoader {
         /**
          * 自动生成
          */
-        AUTO_GENERATE,
-        /**
+        AUTO_GENERATE, /**
          * 传入日志方法
          */
-        PASS_IN,
-        /**
+        PASS_IN, /**
          * 上面两个方法都生成
          */
         AUTO_GENERATE_AND_PASS_IN,
@@ -56,13 +54,12 @@ public class LogTemplateLoader {
 
     enum LogType {
 
-        Molin,
-        Tencent,
-        MolinAndTencent,
+        Molin, Tencent, MolinAndTencent,
 
     }
 
-    public static List<LogTemplate> loadLogTemplateFromXml(final String path, String logTypeDefaultValue, int minIoptype)
+    public static List<LogTemplate> loadLogTemplateFromXml(final String path,
+            String logTypeDefaultValue, int minIoptype)
             throws ParserConfigurationException, IOException, SAXException {
         File file = new File(path);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -77,7 +74,8 @@ public class LogTemplateLoader {
         for (int i = 0; i < structNodes.getLength(); i++) {
             Node structNode = structNodes.item(i);
             if (structNode.getNodeType() == Node.ELEMENT_NODE) {
-                LogTemplate logTemplate = loadLogTemplate((Element) structNode, logTypeDefaultValue, minIoptype);
+                LogTemplate logTemplate =
+                        loadLogTemplate((Element) structNode, logTypeDefaultValue, minIoptype);
 
                 if (logNames.contains(logTemplate.logName)) {
                     throw new RuntimeException("有重复日志：" + logTemplate.logName);
@@ -95,7 +93,8 @@ public class LogTemplateLoader {
         return logTemplateList;
     }
 
-    private static LogTemplate loadLogTemplate(Element structElement, String logTypeDefaultValue, int minIoptype) {
+    private static LogTemplate loadLogTemplate(Element structElement, String logTypeDefaultValue,
+            int minIoptype) {
         String logName = structElement.getAttribute("name");
         if (Strings.isNullOrEmpty(logName)) {
             throw new RuntimeException("竟然有个日志没有填名字！！！");
@@ -104,7 +103,8 @@ public class LogTemplateLoader {
 
         boolean dontUseSpecialArg = false;
         UseSpeicalArgType useSpeicalArgType = loadUseSpecialArgType(structElement);
-        if (useSpeicalArgType == UseSpeicalArgType.DONT || useSpeicalArgType == UseSpeicalArgType.ALL) {
+        if (useSpeicalArgType == UseSpeicalArgType.DONT ||
+                useSpeicalArgType == UseSpeicalArgType.ALL) {
             dontUseSpecialArg = true;
         }
 
@@ -118,8 +118,8 @@ public class LogTemplateLoader {
 
         NodeList entryNodes = structElement.getElementsByTagName("entry");
         List<LogField> fields = Lists.newArrayListWithCapacity(entryNodes.getLength() + 1);
-        fields.add(
-                new LogField("uint", OPERATOR_ID_NAME, "平台Id", "", false, false)); // 每个日志都需要平台id，但是字段里面是不需要记录平台Id的
+        fields.add(new LogField("uint", OPERATOR_ID_NAME, "平台Id", "", false,
+                false)); // 每个日志都需要平台id，但是字段里面是不需要记录平台Id的
         Set<String> fieldNames = Sets.newHashSet();
         fieldNames.add(OPERATOR_ID_NAME);
         for (int i = 0; i < entryNodes.getLength(); i++) {
@@ -144,10 +144,12 @@ public class LogTemplateLoader {
             throw new RuntimeException("在日志：" + logName + "中竟然没有配置服务器Id:iWorldId");
         }
 
-        return new LogTemplate(ioptype, iactionid, logName, logDesc, "", eventIdGenerateType, fields, dontUseSpecialArg, logType, useSpeicalArgType);
+        return new LogTemplate(ioptype, iactionid, logName, logDesc, "", eventIdGenerateType,
+                fields, dontUseSpecialArg, logType, useSpeicalArgType);
     }
 
-    private static String loadLogType(Element structElement, String logTypeDefaultValue, String logName) {
+    private static String loadLogType(Element structElement, String logTypeDefaultValue,
+            String logName) {
         String logType = structElement.getAttribute("logtype");
         if (Strings.isNullOrEmpty(logType)) {
             logType = logTypeDefaultValue;
@@ -189,10 +191,9 @@ public class LogTemplateLoader {
         }
         if (!valid) {
             throw new RuntimeException(
-                    "event_id_generate_type无效，格式为：不填默认AUTO_GENERATE， AUTO_GENERATE-自"
-                            + "动生成， PASS_IN-传入日志方法，AUTO_GENERATE_AND_PASS_IN-前面两个方法都"
-                            + "生成。日志名称:"
-                            + logName);
+                    "event_id_generate_type无效，格式为：不填默认AUTO_GENERATE， AUTO_GENERATE-自" +
+                            "动生成， PASS_IN-传入日志方法，AUTO_GENERATE_AND_PASS_IN-前面两个方法都" + "生成。日志名称:" +
+                            logName);
         }
 
         return eventIdGenerateType;
@@ -210,6 +211,22 @@ public class LogTemplateLoader {
         String fieldType = entryElement.getAttribute("type");
         if (Strings.isNullOrEmpty(fieldType)) {
             throw new RuntimeException("日志：" + logName + "中的字段：" + fieldName + "竟然没有配置类型数据！！！");
+        }
+
+        if ("string".equals(fieldType)) {
+            String sizeStr = entryElement.getAttribute("size");
+            int size;
+            try {
+                size = Integer.parseInt(sizeStr);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException(
+                        "所有的string字段必须配置size参数，并且size参数的值必须大于0, logName=" + logName +
+                                ", fieldName=" + fieldName);
+            }
+
+            if (size <= 0) {
+                throw new RuntimeException("所有的string字段必须配置size参数，并且size参数的值必须大于0");
+            }
         }
 
         String fieldDesc = entryElement.getAttribute("desc");
