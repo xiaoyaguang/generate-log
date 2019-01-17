@@ -28,6 +28,7 @@ public enum TencentParamFixParamName {
 
     public static String convertMolinParamTypeToTencentParamType(String molinParamType) {
         switch (molinParamType) {
+            case "utinyint":
             case "int":
             case "uint":
             case "bigint":
